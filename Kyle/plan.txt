@@ -1,0 +1,29 @@
+########
+# Plan #
+########
+
+Run pitch detection at various sample rates
+
+###################################
+# Data Collection Variables for R #
+###################################
+
+Divide each wav file into 'events' based on silence
+For each event
+
+> Wav filename (not to be used in regression)
+> For multiple sample rates
+>> Type of event
+>> Low frequency
+>> 1st Quartile
+>> 3rd Quartile
+>> Median
+>> Mean
+>> High frequency
+> Elapsed Time
+
+#########
+# Stats #
+#########
+
+Logistic regression or similar categorization method on each 'event' independently
