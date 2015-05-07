@@ -1,7 +1,7 @@
 #install.packages("tuneR")
 
 library(tuneR)
-s10<-readWave("test_pitch.wav")
+s10<-readWave("Baby_cry01.wav")
 head(s10@left)
 
 
