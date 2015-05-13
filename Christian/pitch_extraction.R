@@ -15,13 +15,44 @@ s10<-readWave("Baby_cry01.wav")
 head(s10@left)
 signal<-s10@left
 
+pitches<-get_pitches(signal)
 
-intervals<-ceiling((length(signal)/480))  
-list_signal<-cut(signal,breaks=(480*1:intervals))
+get_pitches<-function(signal){
+  FRAME_SIZE<-480
   
-for(l in 1:)
+  intervals<-c(1,480*1:ceiling((length(signal)/480)))
+  
+  list_of_frames<-my_cut(signal,intervals)
+    
+  pitches<-1:length(list_of_frames)
+  
+  for(i in 1:length(list_of_frames)){
+    pitches[i]<-Pitch(as.numeric(list_of_frames[[i]]),FRAME_SIZE)
+    print(pitches[i])
+  }
+  
+  
+}
+
+my_cut<-function(signal,intervals){
+  
+  list_vectors<-list()
+  
+  for(i in 1:(length(intervals)-1)){
+    vector<-signal[intervals[i]:intervals[i+1]]
+    list_vectors[[i]]<-vector
+  }
+  
+  return(list_vectors)
+}
 
 Pitch<-function(signal,FrameSize){
+  
+  SAMPLING_RATE<-48000
+  MIN_PITCH<-40
+  MAX_PITCH<-720
+  FRAME_SIZE<-480
+  VALID_CORR<-0.7
   
   buffer<-rep(1,MAX_PITCH + FRAME_SIZE)
   Correlation_sm<-rep(0,MAX_PITCH +1)
@@ -65,7 +96,7 @@ Pitch<-function(signal,FrameSize){
   
   
 #Return pitch 
-  if (Max_Corr>VALID_CORR && Max>VALID_CORR-0.3) {
+  if ((Max_Corr>VALID_CORR )& (Max>(VALID_CORR-0.3))) {
       return(Pitch_value);   #valid pitch
     }
   else {
