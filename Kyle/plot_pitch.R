@@ -19,7 +19,7 @@
 #
 
 # Uncomment to save the file
-#pdf('all_sounds_by_color.pdf')
+#pdf('all_sounds_smooth.pdf')
 
 # Create the basic plot
 plot(1,type='n',axes=T,xlim=c(0,2),ylim=c(0,1000),ylab='Pitch Estimate',
@@ -38,7 +38,7 @@ for (f in list.files(pattern='*.csv'))
           "Animal_dog","Baby_cry","Baby_laugh","Baby_neutral"))
     color.sel = (c('red','chocolate','coral2','orange','darkorange',
                 'black','grey','blue','deepskyblue','cyan'))[color.num]
-    lines(wav[,1],wav[,2],twiceit=T),col=color.sel)
+    lines(wav[,1],wav[,2],col=color.sel)
 }
 
 # Uncomment to save the file
