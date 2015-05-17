@@ -18,20 +18,19 @@
 # Takes in all the CSVs and graphs the pitches (saves it, too).
 #
 
-pdf('all_sounds_by_color.pdf')
+# Uncomment to save the file
+#pdf('all_sounds_by_color.pdf')
 
+# Create the basic plot
 plot(1,type='n',axes=T,xlim=c(0,2),ylim=c(0,1000),ylab='Pitch Estimate',
      xlab='Time (s)',main='Pitch Estimates over Time')
 
+# Add lines for each sound
 for (f in list.files(pattern='*.csv'))
 {
     wav <- read.table(f, header=F, sep=" ")
     silence <- wav[,2]==0
 
-#    onset <- min(which(wav[,2] != 0))
-
-#    ends <- cumsum(rle(silence)$lengths)
-#    starts <- c(1,ends[-length(ends)]+1)
     sound.source <- unlist(strsplit(f,fixed=F,split='[0-9]'))[1]
     color.num = which(sound.source == 
         c("Adultfemale_cry","Adultfemale_laugh","Adultfemale_neutral",
@@ -39,9 +38,8 @@ for (f in list.files(pattern='*.csv'))
           "Animal_dog","Baby_cry","Baby_laugh","Baby_neutral"))
     color.sel = (c('red','chocolate','coral2','orange','darkorange',
                 'black','grey','blue','deepskyblue','cyan'))[color.num]
-    # Fraction of a second
-#    time.const <- 1
-    lines(wav[,1],wav[,2],col=color.sel)
+    lines(wav[,1],wav[,2],twiceit=T),col=color.sel)
 }
 
-dev.off()
+# Uncomment to save the file
+#dev.off()

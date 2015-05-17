@@ -12,8 +12,8 @@ Divide each wav file into 'events' based on silence
 For each event
 
 > Wav filename (not to be used in regression)
+> Type of event
 > For multiple sample rates
->> Type of event
 >> Low frequency
 >> 1st Quartile
 >> 3rd Quartile
@@ -27,3 +27,5 @@ For each event
 #########
 
 Logistic regression or similar categorization method on each 'event' independently
+
+https://wiki.python.org/moin/PythonInMusic
