@@ -32,7 +32,7 @@ set.seed(5561)
 tt <- runif(nrow(long.events)) > .5
 
 sound.knn <- knn(long.events[which(tt),vars],long.events[which(!tt),vars],
-    cl = long.events[which(tt),]$Sound.Source,k=10)
+    cl = long.events[which(tt),]$Sound.Source,k=1)
 sound.knn.table <- table(sound.knn,long.events[which(!tt),]$Sound.Source)
 sound.knn.table
 sum(diag(sound.knn.table))/sum(sound.knn.table)
