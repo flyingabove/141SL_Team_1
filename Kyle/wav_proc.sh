@@ -27,3 +27,4 @@ do
     aubiopitch $f >> $name.csv
 done
 
+# -H 512, -H 128, and -p mcomb all resulted in poorer performance
