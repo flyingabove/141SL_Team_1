@@ -21,7 +21,7 @@
 #library(rpart)
 library(e1071)
 
-long.events <- events[which(events$Length > 5),]
+long.events <- events[which(events$Length > 10),]
 long.events$Sound.Source <- as.factor(long.events$Sound.Source)
 
 set.seed(530628)
@@ -30,8 +30,9 @@ testi <- which(runif(nrow(long.events)) > .5)
 e.test <- long.events[testi,]
 e.train <- long.events[-testi,]
 
-event.svm <- svm(x=e.train[,3:9],y=e.train$Sound.Source, cost = 100, gamma = 1)
-event.pred <- predict(event.svm,newdata=e.test[,3:9])
+event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
+event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
 
 e.svm.tab <- table(pred = event.pred, true = e.test[,2])
 sum(diag(e.svm.tab))/sum(e.svm.tab)
+
