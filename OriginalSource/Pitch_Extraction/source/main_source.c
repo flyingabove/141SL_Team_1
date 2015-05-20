@@ -29,6 +29,8 @@
 
 short  Pitch(short *signal, short FrameSize)
 {
+
+	printf("Signal Is:", signal);
 static double buffer[MAX_PITCH+FRAME_SIZE];
 static double Correlation_sm[MAX_PITCH+1];
 static short First_Flag=1; 

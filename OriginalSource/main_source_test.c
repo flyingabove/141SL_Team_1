@@ -29,6 +29,7 @@
 
 short  Pitch(short *signal, short FrameSize)
 {
+	printf(signal, FrameSize);
 static double buffer[MAX_PITCH+FRAME_SIZE];
 static double Correlation_sm[MAX_PITCH+1];
 static short First_Flag=1; 
@@ -93,10 +94,6 @@ double *ptr1, *ptr2;
 		return 0;   //invalid pitch
 	}
 }
-
-
-
-
 
 
 
