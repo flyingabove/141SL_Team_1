@@ -29,6 +29,16 @@
 
 short  Pitch(short *signal, short FrameSize)
 {
+
+	//printf("Signal Is1: %hu\n", signal[0]);
+	//printf("Signal Is2: %hu\n", signal[1]);
+	//printf("Signal Is3: %hu\n", signal[2]);
+
+
+	for (int l = 0; l<479; l++) {
+	printf("Signal Is1:  %d \n", signal[l]);
+	}
+
 static double buffer[MAX_PITCH+FRAME_SIZE];
 static double Correlation_sm[MAX_PITCH+1];
 static short First_Flag=1; 
@@ -116,7 +126,7 @@ int main (short argc, char *argv[] )
 	 /*              Input & Output setting                               */
 	 /*-------------------------------------------------------------------*/
      printf("\n ********************************************************  \n");
-	   printf(" ***** Pitch Estimation for 48kHz Mono Signal    ********  \n");
+	   printf(" ***** Pitch Estimation for 48kHz Mono Signal 3   *******  \n");
 	   printf(" ********************************************************  \n");
 	 
 	 if (argc<3 )
@@ -136,7 +146,7 @@ int main (short argc, char *argv[] )
 
 
 	 while ( (fread(MicIn, sizeof(short), FRAME_SIZE, file_input))==FRAME_SIZE )
-	 {	 
+	 {
 
 #ifdef PRINTOUT
 			 printf ("[%ld frame(s),  %6.3f sec.]\r", frm_count,
@@ -147,7 +157,7 @@ int main (short argc, char *argv[] )
 			 Pitch_value=Pitch(MicIn,FRAME_SIZE);
 			
 #ifdef PRINTOUT
-			 printf (" Pitch for current frame =  %d  \n", Pitch_value);
+			 //printf (" Pitch for current frame =  %d  \n", Pitch_value);
 #endif
 
 			 /* Write pitch in a file */

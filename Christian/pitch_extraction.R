@@ -12,8 +12,12 @@ FrameSize<-480
 
 library(tuneR)
 s10<-readWave("Baby_cry01.wav")
+?readWave
 head(s10@left)
 signal<-s10@left
+tail(signal,1000)
+
+range(signal)
 
 pitches<-get_pitches(signal)
 
