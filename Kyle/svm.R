@@ -30,24 +30,15 @@ set.seed(530628)
 #errors <- vector(length=0)
 errors <- matrix(0,nrow=length(levels(long.events$Sound.Source)),ncol=length(levels(long.events$Sound.Source)))
 
-e.tot <- vector(length=0)
-
-for( j in seq(from=0,to=1,by=0.01))
+for( i in levels(long.events$File.Name))
 {
-    for( i in levels(long.events$File.Name))
-    {
-	    e.test <- long.events[which(long.events$File.Name == i),]
-	    e.train <- long.events[-which(long.events$File.Name == i),]
+    e.test <- long.events[which(long.events$File.Name == i),]
+    e.train <- long.events[-which(long.events$File.Name == i),]
 
-	    event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = j)
-	    event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+    event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
+    event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
 
-	    e.svm.tab <- table(pred = event.pred, true = e.test[,2])
-    #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
-	    errors <- errors + e.svm.tab
-    }
-    e.tot <- c(e.tot, sum(diag(errors))/sum(errors))
-    print(j)
+    e.svm.tab <- table(pred = event.pred, true = e.test[,2])
+#	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
+    errors <- errors + e.svm.tab
 }
-e.tot
-

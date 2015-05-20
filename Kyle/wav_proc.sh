@@ -25,6 +25,17 @@ for f in $(find -name '*.wav')
 do
     name=$(basename --suffix='.wav' $f)
     aubiopitch $f >> $name.csv
+    aubiopitch $f -H 128 >> $name.spec.csv
+    aubiopitch $f -H 512 >> $name.512.csv
 done
 
 # -H 512, -H 128, and -p mcomb all resulted in poorer performance
+
+# Using all 2 got .463
+#    aubiopitch $f >> $name.csv
+#    aubiopitch $f -H 512 >> $name.512.csv
+
+# Using all 3 got .460
+#    aubiopitch $f >> $name.csv
+#    aubiopitch $f -p specacf >> $name.spec.csv
+#    aubiopitch $f -H 512 >> $name.512.csv
