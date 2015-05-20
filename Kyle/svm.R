@@ -21,26 +21,35 @@
 #library(rpart)
 library(e1071)
 
-long.events <- events[which(events$Length > 10),]
-long.events$Sound.Source <- as.factor(long.events$Sound.Source)
-long.events$File.Name <- as.factor(long.events$File.Name)
+e.tot <- vector(length=20)
 
-set.seed(530628)
+for( j in 1:20){
+    long.events <- events[which(events$Length > j),]
+    long.events$Sound.Source <- as.factor(long.events$Sound.Source)
+    long.events$File.Name <- as.factor(long.events$File.Name)
 
-#errors <- vector(length=0)
-errors <- matrix(0,nrow=length(levels(long.events$Sound.Source)),ncol=length(levels(long.events$Sound.Source)))
+    set.seed(530628)
 
-for( i in levels(long.events$File.Name))
-{
-	e.test <- long.events[which(long.events$File.Name == i),]
-	e.train <- long.events[-which(long.events$File.Name == i),]
+    #errors <- vector(length=0)
+    errors <- matrix(0,nrow=length(levels(long.events$Sound.Source)),ncol=length(levels(long.events$Sound.Source)))
 
-	event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
-	event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+    for( i in levels(long.events$File.Name))
+    {
+	    e.test <- long.events[which(long.events$File.Name == i),]
+	    e.train <- long.events[-which(long.events$File.Name == i),]
 
-	e.svm.tab <- table(pred = event.pred, true = e.test[,2])
-#	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
-	errors <- errors + e.svm.tab
+	    event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
+	    event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+
+	    e.svm.tab <- table(pred = event.pred, true = e.test[,2])
+    #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
+	    errors <- errors + e.svm.tab
+    }
+    e.tot[j] <- (sum(diag(errors)) / sum(errors))
 }
-errors
+e.tot
 
+# Change in prediction rate with respect to the Length beyond which we assume an event occured (to eliminate random noise)
+plot(c(1:20),e.tot)
+which(max(e.tot))
+# 17-18 are the best with 35% prediction
