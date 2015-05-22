@@ -26,8 +26,6 @@ str(ts_signal1)
 
 local_max<-function(ts_signal1_test,time_vector=0){
   n <- length(ts_signal1_test)
-  max_ts_signal_time <- vector(length=n)
-  max_ts_signal_y<- vector(length=n)
   CURRENT<-(ts_signal1_test[2:n] - ts_signal1_test[1:(n-1)])
   PAST<- (c(0,CURRENT[-(n-1)]) >= 0)
   CURRENT <- (CURRENT < 0)
