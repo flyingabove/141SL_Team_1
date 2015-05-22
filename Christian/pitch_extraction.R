@@ -17,6 +17,10 @@ head(s10@left)
 signal<-s10@left
 tail(signal,1000)
 
+library(audio)
+s10<-load.wave("Baby_cry01.wav")
+
+
 range(signal)
 
 pitches<-get_pitches(signal)
