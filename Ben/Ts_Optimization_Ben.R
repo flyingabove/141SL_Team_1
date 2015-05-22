@@ -25,22 +25,17 @@ str(ts_signal1)
 #3rd Attempt
 
 local_max<-function(ts_signal1_test,time_vector=0){
-  max_ts_signal_time<-NULL
-  max_ts_signal_y<-NULL
-  CURRENT<-0
-  PAST<-0
-  for(i in 1:(length(ts_signal1_test)-1)){
-    t1<-ts_signal1_test[i]
-    t2<-ts_signal1_test[i+1]
-    CURRENT<-t2-t1
-    print(i)
-    if((CURRENT<0)&(PAST>=0)){
-      if(time_vector==0) max_ts_signal_time=c(max_ts_signal_time,i)
-      if(time_vector!=0) max_ts_signal_time=c(max_ts_signal_time,time_vector[i])
-      max_ts_signal_y=c(max_ts_signal_y,t1)
-    }
-    PAST<-CURRENT
-  }
+  max_ts_signal_time <- c()
+  max_ts_signal_y<- c()
+  n <- length(ts_signal1_test)
+  CURRENT<-((ts_signal1_test[2:n] - ts_signal1_test[1:(n-1)]) <0)
+  PAST<-c((0,CURRENT[-(n-1)]) >= 0)
+  max.index <- which(CURRENT * PAST)
+  if(!time_vector) max_ts_signal_time[max.index] = max.index
+  if(time_vector) max_ts_signal_time[max.index] = time_vector[max.index]
+  max_ts_signal_y[max.index] = (ts_signal1_test[2:n] - ts_signal1_test[1:(n-1)])[max.index]
+  max_ts_signal_time <- max_ts_signal_time[!is.na(max_ts_signal_time)]
+  max_ts_signal_y <- max_ts_signal_y[!is.na(max_ts_signal_y)]
   return(list(max_ts_signal_time,max_ts_signal_y))
 }
 local_min<-function(ts_signal1_test,time_vector=0){
