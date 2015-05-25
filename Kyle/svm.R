@@ -24,29 +24,25 @@ library(e1071)
 long.events <- events[which(events$Length > 18),]
 long.events$Sound.Source <- as.factor(long.events$Sound.Source)
 long.events$File.Name <- as.factor(long.events$File.Name)
-long.events$baby.cry <- as.factor(long.events$Sound.Source == 'Baby_cry')
 
 set.seed(530628)
 
 #errors <- vector(length=0)
-errors <- matrix(0,nrow=length(levels(long.events$baby.cry)),ncol=length(levels(long.events$baby.cry)))
+errors <- matrix(0,nrow=length(levels(long.events$Sound.Source)),ncol=length(levels(long.events$Sound.Source)))
 
 for( i in levels(long.events$File.Name))
 {
     e.test <- long.events[which(long.events$File.Name == i),]
     e.train <- long.events[-which(long.events$File.Name == i),]
 
-    event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = 100, gamma = 1)
+    event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
     event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
 
-    e.svm.tab <- table(pred = event.pred, true = e.test[,10])
+    e.svm.tab <- table(pred = event.pred, true = e.test[,2])
 #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
+    e.svm.tab <- floor(e.svm.tab / max(e.svm.tab))
+    print(    e.svm.tab)
     errors <- errors + e.svm.tab
 }
 
-sum(diag(errors)) / sum(errors)
-# Type 1 error (false positive)
-errors[2,1]
-# Type 2 error (false negative)
-errors[1,2]
-
+sum(diag(errors))/sum(errors)
