@@ -3,6 +3,8 @@ d1 <- as.data.frame(t(Baby_cry))
 names(d1)<-paste("Frame",1:160)
 
 Names<-row.names(d1)
-d2<-cbind(Names,d1)
-row.names(d2)<-1:length(d2[,1])
-View(d2)
+Baby_cry<-cbind(Names,d1)
+row.names(Baby_cry)<-1:length(Baby_cry[,1])
+View(Baby_cry)
+
+save(Baby_cry, file="Baby_cry.Rdata")
