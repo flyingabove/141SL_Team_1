@@ -37,12 +37,11 @@ for( i in levels(long.events$File.Name))
 
     event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
     event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+    if('Baby_cry' %in% event.pred){ event.pred[1:length(event.pred)] <- rep('Baby_cry',length(event.pred)) }
 
     e.svm.tab <- table(pred = event.pred, true = e.test[,2])
-#	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
-    e.svm.tab <- floor(e.svm.tab / max(e.svm.tab))
-    print(    e.svm.tab)
     errors <- errors + e.svm.tab
 }
 
 sum(diag(errors))/sum(errors)
+
