@@ -40,9 +40,9 @@ for( i in levels(long.events$File.Name))
     event.svm <- svm(x=e.train[,c(4:9)],y=e.train$Sound.Source, cost = 100, gamma = 1)
     event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
     event.lik <- aggregate(e.test[,9],by=list(event.pred),sum)
-    event.pred[1] <- event.lik[which.max(event.lik[,2]),1]
+    if('Baby_cry' %in% event.pred){ event.pred[1] <- 'Baby_cry' }
+    else{ event.pred[1] <- event.lik[which.max(event.lik[,2]),1] }
     e.svm.tab <- table(pred = event.pred[1], true = e.test[1,2])
-    print(sum(e.svm.tab))
     errors <- errors + e.svm.tab
 }
 
