@@ -1,6 +1,10 @@
 library(tuneR)
 
-#Functions
+###CodeBook###
+
+ 
+
+#Interval Functions
 get_intervals<-function(ts_signal1){
   LOWESS_F=.15
   MAX_POINTS=200
@@ -31,41 +35,44 @@ get_intervals<-function(ts_signal1){
   return(min_x[-1])
 }
 local_max<-function(ts_signal1_test,time_vector=0){
-  max_ts_signal_time<-NULL
-  max_ts_signal_y<-NULL
+  max_ts_signal_time <- c()
+  max_ts_signal_y<- c()
   CURRENT<-0
   PAST<-0
   for(i in 1:(length(ts_signal1_test)-1)){
     t1<-ts_signal1_test[i]
     t2<-ts_signal1_test[i+1]
     CURRENT<-t2-t1
-    print(i)
     if((CURRENT<0)&(PAST>=0)){
-      if(time_vector==0) max_ts_signal_time=c(max_ts_signal_time,i)
-      if(time_vector!=0) max_ts_signal_time=c(max_ts_signal_time,time_vector[i])
-      max_ts_signal_y=c(max_ts_signal_y,t1)
+      if(time_vector==0) max_ts_signal_time[i] = i
+      if(time_vector!=0) max_ts_signal_time[i] = time_vector[i]
+      max_ts_signal_y[i] = t1
     }
     PAST<-CURRENT
   }
+  max_ts_signal_time <- max_ts_signal_time[!is.na(max_ts_signal_time)]
+  max_ts_signal_y <- max_ts_signal_y[!is.na(max_ts_signal_y)]
   return(list(max_ts_signal_time,max_ts_signal_y))
 }
-local_min<-function(ts_signal1_test,time_vector=0){
-  min_ts_signal_time<-NULL
-  min_ts_signal_y<-NULL
+
+local_min <- function(ts_signal1_test,time_vector=0){
+  min_ts_signal_time <- c()
+  min_ts_signal_y <- c()
   CURRENT<-0
   PAST<-0
   for(i in 1:(length(ts_signal1_test)-1)){
     t1<-ts_signal1_test[i]
     t2<-ts_signal1_test[i+1]
     CURRENT<-t2-t1
-    print(i)
     if((CURRENT>0)&(PAST<=0)){
-      if(time_vector==0) min_ts_signal_time=c(min_ts_signal_time,i)
-      if(time_vector!=0) min_ts_signal_time=c(min_ts_signal_time,time_vector[i])
-      min_ts_signal_y=c(min_ts_signal_y,t1)
+      if(time_vector==0) min_ts_signal_time[i] <- i
+      if(time_vector!=0) min_ts_signal_time[i] <- time_vector[i]
+      min_ts_signal_y[i] <- t1
     }
     PAST<-CURRENT
   }
+  min_ts_signal_time <- min_ts_signal_time[!is.na(min_ts_signal_time)]
+  min_ts_signal_y <- min_ts_signal_y[!is.na(min_ts_signal_y)]
   return(list(min_ts_signal_time,min_ts_signal_y))
 }
 
@@ -73,6 +80,12 @@ local_min<-function(ts_signal1_test,time_vector=0){
 intervals<-get_intervals(ts_signal1)
 intervals
 
+#Pitch Extraction Functions
+
+get_pitches<-function(WAV_name,WAV_intervals){
+  WAV_name
+  WAV_intervals_2
+}
 #ORGANIZATION FUNCTION
 
 WAV_list<-c("Baby_cry01.wav","Baby_cry01.wav")
@@ -81,7 +94,8 @@ training_generator<-function(WAV_list){
   list_training<-NULL
   
   for(i in 1:length(WAV_list)){
-    s10<-readWave(WAV_list[i])
+    WAV_name<-WAV_list[i]
+    s10<-readWave(WAV_name)
     head(s10@left)
     signal<-s10@left
     ts_signal<-ts(signal)
@@ -91,6 +105,7 @@ training_generator<-function(WAV_list){
     #make positive time series
     ts_signal1<-ts(signal1)
     WAV_intervals<-get_intervals(signal1)
+    WAV_intervals_2<-c(0,WAV_intervals,length(signal1))
     
     list_training<-c(list_training,list(list(signal1,c(0,WAV_intervals,length(signal1)),c("LOW","NOPITCH","HIGH"))))
   }
