@@ -23,8 +23,11 @@ library(e1071)
 
 long.events <- events[which(events$Length > 18),]
 long.events$Sound.Source <- as.factor(long.events$Sound.Source)
-long.events$File.Name <- as.factor(long.events$File.Name)
 long.events$baby.cry <- as.factor(long.events$Sound.Source == 'Baby_cry')
+
+for(i in 1:nrow(long.events))
+{long.events$File.Name[i] <- unlist(strsplit(long.events$File.Name[i],fixed=F,split='[.]'))[1]}
+long.events$File.Name <- as.factor(long.events$File.Name)
 
 set.seed(530628)
 
@@ -39,7 +42,9 @@ for( i in levels(long.events$File.Name))
     event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = 100, gamma = 1)
     event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
 
-    e.svm.tab <- table(pred = event.pred, true = e.test[,10])
+    if(TRUE %in% event.pred){ event.pred[1] <- TRUE }
+
+    e.svm.tab <- table(pred = event.pred[1], true = e.test[1,10])
 #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
     errors <- errors + e.svm.tab
 }
