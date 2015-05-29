@@ -11,7 +11,7 @@ library(class)
 vars <- c(3:9)
 set.seed(5561)
 
-errors <- matrix(0,nrow=length(levels(long.events$Sound.Source)),ncol=length(levels(long.events$Sound.Source)))
+errors <- matrix(0,nrow=2,ncol=2)
 
 for( i in levels(long.events$File.Name))
 {
@@ -20,8 +20,11 @@ for( i in levels(long.events$File.Name))
         long.events[which(long.events$File.Name == i),vars], # test
         cl = long.events$Sound.Source[-which(long.events$File.Name == i)], # true classifications
         k=1)    # k groups
-    sound.knn.table <- table(sound.knn,long.events$Sound.Source[which(long.events$File.Name == i)])
-    errors <- errors + sound.knn.table
+    pred.baby.cry <- FALSE
+    if('Baby_cry' %in% sound.knn){ pred.baby.cry <- TRUE }
+    actu.baby.cry <- FALSE
+    if('Baby_cry' %in% long.events$Sound.Source[which(long.events$File.Name == i)]){ actu.baby.cry <- TRUE }
+    errors[pred.baby.cry+1,actu.baby.cry+1] <- errors[pred.baby.cry+1,actu.baby.cry+1] + 1
 }
 
 sum(diag(errors))/sum(errors)
