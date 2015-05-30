@@ -34,24 +34,32 @@ set.seed(530628)
 #errors <- vector(length=0)
 errors <- matrix(0,nrow=length(levels(long.events$baby.cry)),ncol=length(levels(long.events$baby.cry)))
 
-for( i in levels(long.events$File.Name))
+n <- 120
+
+error3d <- array(0,dim=c(2,2,n))
+pred.rate <- vector(length=n)
+for( j in 1:n)
 {
-    e.test <- long.events[which(long.events$File.Name == i),]
-    e.train <- long.events[-which(long.events$File.Name == i),]
+    errors <- matrix(0,nrow=2,ncol=2)
 
-    event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = 100, gamma = 1)
-    event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+    for( i in levels(long.events$File.Name))
+    {
+        e.test <- long.events[which(long.events$File.Name == i),]
+        e.train <- long.events[-which(long.events$File.Name == i),]
 
-    if(TRUE %in% event.pred){ event.pred[1] <- TRUE }
+        event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = j, gamma = 1)
+        event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
 
-    e.svm.tab <- table(pred = event.pred[1], true = e.test[1,10])
-#	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
-    errors <- errors + e.svm.tab
+        if(TRUE %in% event.pred){ event.pred[1] <- TRUE }
+
+        e.svm.tab <- table(pred = event.pred[1], true = e.test[1,10])
+    #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
+        errors <- errors + e.svm.tab
+    }
+    error3d[,,j] <- errors 
+    pred.rate[j] <- sum(diag(errors)) / sum(errors)
+    print(j)
 }
 
-sum(diag(errors)) / sum(errors)
-# Type 1 error (false positive)
-errors[2,1]
-# Type 2 error (false negative)
-errors[1,2]
+plot(pred.rate[j])
 
