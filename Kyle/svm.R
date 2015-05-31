@@ -56,10 +56,19 @@ for( j in 1:n)
     #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
         errors <- errors + e.svm.tab
     }
-    error3d[,,j] <- errors 
+    error3d[,,j] <- errors
     pred.rate[j] <- sum(diag(errors)) / sum(errors)
-    print(j)
 }
 
-plot(pred.rate[j])
+library(ggplot2)
 
+error.df <- data.frame(cbind(apply(error3d,3,function(x) {sum(diag(x)) / sum(x)}),apply(error3d,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(error3d,3,function(x) { (x[2,2] / sum(x[2,])) })))
+names(error.df) <- c('pred.rate','type2rate','type1rate')
+
+library(reshape)
+
+error.df.long <- cbind(1:n,melt(error.df))
+
+colnames(error.df.long)[1] <- 'x'
+
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line()

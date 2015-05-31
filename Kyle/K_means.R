@@ -11,9 +11,10 @@ library(class)
 vars <- c(3:9)
 set.seed(5561)
 
-k.pred.rate <- vector(length=45)
-k.errors <- array(dim=c(2,2,45))
-for( j in 1:length(k.pred.rate))
+n <- 45
+k.pred.rate <- vector(length=n)
+k.errors <- array(dim=c(2,2,n))
+for( j in 1:n)
 {
     errors <- matrix(0,nrow=2,ncol=2)
 
@@ -34,7 +35,14 @@ for( j in 1:length(k.pred.rate))
     k.pred.rate[j] <- sum(diag(errors))/sum(errors)
 }
 
-k.pred.rate
+error.df <- data.frame(cbind(apply(k.errors,3,function(x) {sum(diag(x)) / sum(x)}),apply(k.errors,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(k.errors,3,function(x) { (x[2,2] / sum(x[2,])) })))
+names(error.df) <- c('pred.rate','type2rate','type1rate')
 
-plot(k.pred.rate)
+library(reshape)
+
+error.df.long <- cbind(1:n,melt(error.df))
+
+colnames(error.df.long)[1] <- 'x'
+
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line()
 
