@@ -33,6 +33,7 @@ library(reshape)
 % SLIDE 1
 %
 \section{Introduction}
+\subsection{Pitch Analysis}
 \begin{frame}[fragile]{General Idea}
 \begin{itemize}
 \item Pitch analysis using FOSS \texttt{aubio}\footnote{\url{aubio.org}} C-based software
@@ -58,6 +59,7 @@ ggplot(baby_laugh01,aes(V1,V2)) + geom_line() + xlab('Time') + ylab('PitchEstima
 \end{block}
 \end{frame}
 
+\subsection{Gathering Data}
 \begin{frame}[fragile]{Statistics}
 \begin{itemize}
 \item Separate each file into \textbf{events} based on silence
@@ -76,17 +78,18 @@ events[1:3,2:9]
 %
 % Assumptions
 %
+\section{Analysis}
+\subsection{Prioritizing Results}
 \begin{frame}{Assumptions}
 \begin{columns}[T]
 \begin{column}{.48\textwidth}
 \begin{itemize}
 \item Sensitivity (Power, TPR) is the most important measurement
 \item False alarms are better than no alarm (within reason)
-\item Other sounds don't matter, making the outcome similar to a Bernoulli RV
+\item Other sounds don't matter, making the outcome binary
 \item Precision is given by PPV
 \end{itemize}
-\end{column}
-\hfill
+\end{column}\hfill
 \begin{column}{.48\textwidth}
 \begin{tabular}{c | c | c |}
 & Cry F & Cry T \\\hline
@@ -105,9 +108,35 @@ PPV = \frac{\sum TP}{\sum FP + \sum TP}
 % K-Means
 %
 
-\section{K-Means}
+\subsection{Model Background}
+\begin{frame}{Supervised Learning Methods}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\begin{block}{K-Means}
+Iterative classification based on distance from means
+\begin{itemize}
+\item Fast
+\item Uses euclidean distance from means
+\item Simple
+\end{itemize}
+\end{block}
+\end{column}\hfill
+\begin{column}{.48\textwidth}
+\begin{block}{Support Vector Machine}
+Learns classes with a penalty value, and bounds them based on the kernel
+\begin{itemize}
+\item Slower
+\item Draws more complex boundaries
+\item More complex
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\section{Models}
+\subsection{K-Means}
 \begin{frame}[fragile]{K-Means}
-\begin{block}{Changing the value of K}
 \begin{itemize}
 \item We want to minimize the ``false negative rate'' ($\beta$), i.e. maximize the power
 \item Highest power occurs at k=1 or k=2
@@ -160,12 +189,15 @@ PPV = \frac{\sum TP}{\sum FP + \sum TP}
 
 error.df.long <- read.table('k_means_error.txt',sep=',',header=T)
 
-ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + xlab('k')  + coord_fixed(ratio=30)
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + xlab('k')  + theme(aspect.ratio = .75) #coord_fixed(ratio=30)
 @
-\end{block}
 \end{frame}
 \section[SVM]{Support Vector Machine}
 \begin{frame}[fragile]{Support Vector Machine}
+\begin{itemize}
+\item The highest power occurs once we set $cost \geq 24$
+\item Precision and power are maximized around $cost \approx 27$
+\end{itemize}\vspace{-30pt}
 <<echo=F,fig=T>>=
 #~ library(e1071)
 #~ set.seed(530628)
@@ -208,16 +240,18 @@ ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + xlab('k')  + c
 
 error.df.long <- read.table('svm_error.txt',sep=',',header=T)
 
-ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + coord_fixed(ratio=30)
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + theme(aspect.ratio = .75) + xlab('cost')
 @
 \end{frame}
 
-\section{Results}
-\begin{frame}
+\section{Conclusion}
+\subsection{Results}
+\begin{frame}{Results}
 \begin{itemize}
 \item A SVM model using multiple samplings of each \texttt{wav} file and a high cost has the best prediction
-\item Using a SVM model with LOOCV, we can get a power of approximately $52.3\%$
+\item Using a SVM, we can get a power of approximately $52.3\%$\footnote{tested by LOOCV}
 \item By adding in volume analysis in a similar style, we should be able to further improve the power of the model
+\item Other clustering methods (EM, Logistic Regression) could be tried and compared
 \end{itemize}
 \end{frame}
 \end{document}
