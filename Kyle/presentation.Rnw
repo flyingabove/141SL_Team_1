@@ -113,49 +113,52 @@ PPV = \frac{\sum TP}{\sum FP + \sum TP}
 \item Highest power occurs at k=1 or k=2
 \end{itemize}\vspace{-45pt}
 <<fig=T,echo=F>>=
-long.events <- events[which(events$Length > 18),]
-long.events$Sound.Source <- as.factor(long.events$Sound.Source)
-long.events$baby.cry <- as.factor(long.events$Sound.Source == 'Baby_cry')
+#~ long.events <- events[which(events$Length > 18),]
+#~ long.events$Sound.Source <- as.factor(long.events$Sound.Source)
+#~ long.events$baby.cry <- as.factor(long.events$Sound.Source == 'Baby_cry')
+#~ 
+#~ for(i in 1:nrow(long.events))
+#~ {long.events$File.Name[i] <- unlist(strsplit(long.events$File.Name[i],fixed=F,split='[.]'))[1]}
+#~ long.events$File.Name <- as.factor(long.events$File.Name)
+#~ 
+#~ library(class)
+#~ 
+#~ vars <- c(3:9)
+#~ set.seed(5561)
+#~ 
+#~ n <- 45
+#~ k.pred.rate <- vector(length=n)
+#~ k.errors <- array(dim=c(2,2,n))
+#~ for( j in 1:n)
+#~ {
+#~     errors <- matrix(0,nrow=2,ncol=2)
+#~ 
+#~     for( i in levels(long.events$File.Name))
+#~     {
+#~         sound.knn <- knn(
+#~             long.events[-which(long.events$File.Name == i),vars], # train
+#~             long.events[which(long.events$File.Name == i),vars], # test
+#~             cl = long.events$Sound.Source[-which(long.events$File.Name == i)], # true classifications
+#~             k=j)    # k groups
+#~         pred.baby.cry <- FALSE
+#~         if('Baby_cry' %in% sound.knn){ pred.baby.cry <- TRUE }
+#~         actu.baby.cry <- FALSE
+#~         if('Baby_cry' %in% long.events$Sound.Source[which(long.events$File.Name == i)]){ actu.baby.cry <- TRUE }
+#~         errors[pred.baby.cry+1,actu.baby.cry+1] <- errors[pred.baby.cry+1,actu.baby.cry+1] + 1
+#~     }
+#~     k.errors[,,j] <- errors
+#~     k.pred.rate[j] <- sum(diag(errors))/sum(errors)
+#~ }
+#~ 
+#~ error.df <- data.frame(cbind(apply(k.errors,3,function(x) {sum(diag(x)) / sum(x)}),apply(k.errors,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(k.errors,3,function(x) { (x[2,2] / sum(x[2,])) })))
+#~ names(error.df) <- c('pred.rate','Power','Precision')
+#~ 
+#~ error.df.long <- cbind(1:n,melt(error.df))
+#~ 
+#~ colnames(error.df.long)[1] <- 'x'
+#~ write.table(error.df.long,'k_means_error.txt',sep=',',row.names=F)
 
-for(i in 1:nrow(long.events))
-{long.events$File.Name[i] <- unlist(strsplit(long.events$File.Name[i],fixed=F,split='[.]'))[1]}
-long.events$File.Name <- as.factor(long.events$File.Name)
-
-library(class)
-
-vars <- c(3:9)
-set.seed(5561)
-
-n <- 45
-k.pred.rate <- vector(length=n)
-k.errors <- array(dim=c(2,2,n))
-for( j in 1:n)
-{
-    errors <- matrix(0,nrow=2,ncol=2)
-
-    for( i in levels(long.events$File.Name))
-    {
-        sound.knn <- knn(
-            long.events[-which(long.events$File.Name == i),vars], # train
-            long.events[which(long.events$File.Name == i),vars], # test
-            cl = long.events$Sound.Source[-which(long.events$File.Name == i)], # true classifications
-            k=j)    # k groups
-        pred.baby.cry <- FALSE
-        if('Baby_cry' %in% sound.knn){ pred.baby.cry <- TRUE }
-        actu.baby.cry <- FALSE
-        if('Baby_cry' %in% long.events$Sound.Source[which(long.events$File.Name == i)]){ actu.baby.cry <- TRUE }
-        errors[pred.baby.cry+1,actu.baby.cry+1] <- errors[pred.baby.cry+1,actu.baby.cry+1] + 1
-    }
-    k.errors[,,j] <- errors
-    k.pred.rate[j] <- sum(diag(errors))/sum(errors)
-}
-
-error.df <- data.frame(cbind(apply(k.errors,3,function(x) {sum(diag(x)) / sum(x)}),apply(k.errors,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(k.errors,3,function(x) { (x[2,2] / sum(x[2,])) })))
-names(error.df) <- c('pred.rate','Power','Precision')
-
-error.df.long <- cbind(1:n,melt(error.df))
-
-colnames(error.df.long)[1] <- 'x'
+error.df.long <- read.table('k_means_error.txt',sep=',',header=T)
 
 ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + xlab('k')  + coord_fixed(ratio=30)
 @
@@ -164,45 +167,48 @@ ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + xlab('k')  + c
 \section[SVM]{Support Vector Machine}
 \begin{frame}[fragile]{Support Vector Machine}
 <<echo=F,fig=T>>=
-library(e1071)
-set.seed(530628)
+#~ library(e1071)
+#~ set.seed(530628)
+#~ 
+#~ errors <- matrix(0,nrow=length(levels(long.events$baby.cry)), ncol=length(levels(long.events$baby.cry)))
+#~ 
+#~ n <- 120
+#~ 
+#~ error3d <- array(0,dim=c(2,2,n))
+#~ pred.rate <- vector(length=n)
+#~ for( j in 1:n)
+#~ {
+#~     errors <- matrix(0,nrow=2,ncol=2)
+#~ 
+#~     for( i in levels(long.events$File.Name))
+#~     {
+#~         e.test <- long.events[which(long.events$File.Name == i),]
+#~         e.train <- long.events[-which(long.events$File.Name == i),]
+#~ 
+#~         event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = j, gamma = 1)
+#~         event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+#~ 
+#~         if(TRUE %in% event.pred){ event.pred[1] <- TRUE }
+#~ 
+#~         e.svm.tab <- table(pred = event.pred[1], true = e.test[1,10])
+#~     #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
+#~         errors <- errors + e.svm.tab
+#~     }
+#~     error3d[,,j] <- errors
+#~     pred.rate[j] <- sum(diag(errors)) / sum(errors)
+#~ }
+#~ 
+#~ error.df <- data.frame(cbind(apply(error3d,3,function(x) {sum(diag(x)) / sum(x)}),apply(error3d,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(error3d,3,function(x) { (x[2,2] / sum(x[2,])) })))
+#~ names(error.df) <- c('pred.rate','Power','Precision')
+#~ 
+#~ error.df.long <- cbind(1:n,melt(error.df))
+#~ 
+#~ colnames(error.df.long)[1] <- 'x'
+#~ write.table(error.df.long,'svm_error.txt',sep=',',row.names=F)
 
-errors <- matrix(0,nrow=length(levels(long.events$baby.cry)), ncol=length(levels(long.events$baby.cry)))
+error.df.long <- read.table('svm_error.txt',sep=',',header=T)
 
-n <- 120
-
-error3d <- array(0,dim=c(2,2,n))
-pred.rate <- vector(length=n)
-for( j in 1:n)
-{
-    errors <- matrix(0,nrow=2,ncol=2)
-
-    for( i in levels(long.events$File.Name))
-    {
-        e.test <- long.events[which(long.events$File.Name == i),]
-        e.train <- long.events[-which(long.events$File.Name == i),]
-
-        event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = j, gamma = 1)
-        event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
-
-        if(TRUE %in% event.pred){ event.pred[1] <- TRUE }
-
-        e.svm.tab <- table(pred = event.pred[1], true = e.test[1,10])
-    #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
-        errors <- errors + e.svm.tab
-    }
-    error3d[,,j] <- errors
-    pred.rate[j] <- sum(diag(errors)) / sum(errors)
-}
-
-error.df <- data.frame(cbind(apply(error3d,3,function(x) {sum(diag(x)) / sum(x)}),apply(error3d,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(error3d,3,function(x) { (x[2,2] / sum(x[2,])) })))
-names(error.df) <- c('pred.rate','Power','Precision')
-
-error.df.long <- cbind(1:n,melt(error.df))
-
-colnames(error.df.long)[1] <- 'x'
-
-ggplot(error.df.long,aes(x,value,color=variable)) + geom_line()
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + coord_fixed(ratio=30)
 @
 \end{frame}
 
