@@ -1,0 +1,217 @@
+\documentclass[11pt]{beamer}
+\usetheme{Szeged}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usecolortheme{dolphin}
+\author{Kyle Colton}
+\title{Baby Monitor}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+%\logo{}
+\usepackage{Sweave}
+\institute{Stats 141SL} 
+\date{Today} 
+%\subject{}
+\begin{document}
+
+%\begin{frame}
+%\titlepage
+%\end{frame}
+
+%\begin{frame}
+%\tableofcontents
+%\end{frame}
+
+<<echo=F>>=
+source('eventCapture.R')
+library(ggplot2)
+library(reshape)
+@
+%
+% SLIDE 1
+%
+\section{Introduction}
+\begin{frame}[fragile]{General Idea}
+\begin{itemize}
+\item Pitch analysis using FOSS \texttt{aubio}\footnote{\url{aubio.org}} C-based software
+\item \texttt{aubio} gives pitch estimates over time
+\end{itemize}
+<<echo=F>>=
+baby_laugh01 <- read.csv('Baby_laugh01.csv',header=F,sep=' ')
+@
+\begin{block}{\texttt{aubio} Output}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+<<>>=
+head(baby_laugh01,5)
+@
+\end{column}
+\hfill
+\begin{column}{.48\textwidth}
+<<fig=T,echo=F>>=
+ggplot(baby_laugh01,aes(V1,V2)) + geom_line() + xlab('Time') + ylab('PitchEstimate')
+@
+\end{column}
+\end{columns}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Statistics}
+\begin{itemize}
+\item Separate each file into \textbf{events} based on silence
+\item Collection of descriptive statistics on each \textbf{event}
+\item Create a model clustering based on the descriptive statistics
+\end{itemize}
+\begin{block}{Sample Statistics}
+\begin{small}
+<<>>=
+events[1:3,2:9]
+@
+\end{small}
+\end{block}
+\end{frame}
+
+%
+% Assumptions
+%
+\begin{frame}{Assumptions}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\begin{itemize}
+\item Sensitivity (Power, TPR) is the most important measurement
+\item False alarms are better than no alarm (within reason)
+\item Other sounds don't matter, making the outcome similar to a Bernoulli RV
+\item Precision is given by PPV
+\end{itemize}
+\end{column}
+\hfill
+\begin{column}{.48\textwidth}
+\begin{tabular}{c | c | c |}
+& Cry F & Cry T \\\hline
+Predict F & TN & FN \\\hline
+Predict T & FP & TP\\\hline
+\end{tabular}
+\begin{align*}
+TPR = \frac{\sum TP}{\sum TP + \sum FN}\\
+PPV = \frac{\sum TP}{\sum FP + \sum TP}
+\end{align*}
+\end{column}
+\end{columns}
+\end{frame}
+
+%
+% K-Means
+%
+
+\section{K-Means}
+\begin{frame}[fragile]{K-Means}
+\begin{block}{Changing the value of K}
+\begin{itemize}
+\item We want to minimize the ``false negative rate'' ($\beta$), i.e. maximize the power
+\item Highest power occurs at k=1 or k=2
+\end{itemize}\vspace{-45pt}
+<<fig=T,echo=F>>=
+long.events <- events[which(events$Length > 18),]
+long.events$Sound.Source <- as.factor(long.events$Sound.Source)
+long.events$baby.cry <- as.factor(long.events$Sound.Source == 'Baby_cry')
+
+for(i in 1:nrow(long.events))
+{long.events$File.Name[i] <- unlist(strsplit(long.events$File.Name[i],fixed=F,split='[.]'))[1]}
+long.events$File.Name <- as.factor(long.events$File.Name)
+
+library(class)
+
+vars <- c(3:9)
+set.seed(5561)
+
+n <- 45
+k.pred.rate <- vector(length=n)
+k.errors <- array(dim=c(2,2,n))
+for( j in 1:n)
+{
+    errors <- matrix(0,nrow=2,ncol=2)
+
+    for( i in levels(long.events$File.Name))
+    {
+        sound.knn <- knn(
+            long.events[-which(long.events$File.Name == i),vars], # train
+            long.events[which(long.events$File.Name == i),vars], # test
+            cl = long.events$Sound.Source[-which(long.events$File.Name == i)], # true classifications
+            k=j)    # k groups
+        pred.baby.cry <- FALSE
+        if('Baby_cry' %in% sound.knn){ pred.baby.cry <- TRUE }
+        actu.baby.cry <- FALSE
+        if('Baby_cry' %in% long.events$Sound.Source[which(long.events$File.Name == i)]){ actu.baby.cry <- TRUE }
+        errors[pred.baby.cry+1,actu.baby.cry+1] <- errors[pred.baby.cry+1,actu.baby.cry+1] + 1
+    }
+    k.errors[,,j] <- errors
+    k.pred.rate[j] <- sum(diag(errors))/sum(errors)
+}
+
+error.df <- data.frame(cbind(apply(k.errors,3,function(x) {sum(diag(x)) / sum(x)}),apply(k.errors,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(k.errors,3,function(x) { (x[2,2] / sum(x[2,])) })))
+names(error.df) <- c('pred.rate','Power','Precision')
+
+error.df.long <- cbind(1:n,melt(error.df))
+
+colnames(error.df.long)[1] <- 'x'
+
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + xlab('k')  + coord_fixed(ratio=30)
+@
+\end{block}
+\end{frame}
+\section[SVM]{Support Vector Machine}
+\begin{frame}[fragile]{Support Vector Machine}
+<<echo=F,fig=T>>=
+library(e1071)
+set.seed(530628)
+
+errors <- matrix(0,nrow=length(levels(long.events$baby.cry)), ncol=length(levels(long.events$baby.cry)))
+
+n <- 120
+
+error3d <- array(0,dim=c(2,2,n))
+pred.rate <- vector(length=n)
+for( j in 1:n)
+{
+    errors <- matrix(0,nrow=2,ncol=2)
+
+    for( i in levels(long.events$File.Name))
+    {
+        e.test <- long.events[which(long.events$File.Name == i),]
+        e.train <- long.events[-which(long.events$File.Name == i),]
+
+        event.svm <- svm(x=e.train[,c(4:9)],y=e.train$baby.cry, cost = j, gamma = 1)
+        event.pred <- predict(event.svm,newdata=e.test[,c(4:9)])
+
+        if(TRUE %in% event.pred){ event.pred[1] <- TRUE }
+
+        e.svm.tab <- table(pred = event.pred[1], true = e.test[1,10])
+    #	errors <- c(errors,sum(diag(e.svm.tab))/sum(e.svm.tab))
+        errors <- errors + e.svm.tab
+    }
+    error3d[,,j] <- errors
+    pred.rate[j] <- sum(diag(errors)) / sum(errors)
+}
+
+error.df <- data.frame(cbind(apply(error3d,3,function(x) {sum(diag(x)) / sum(x)}),apply(error3d,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(error3d,3,function(x) { (x[2,2] / sum(x[2,])) })))
+names(error.df) <- c('pred.rate','Power','Precision')
+
+error.df.long <- cbind(1:n,melt(error.df))
+
+colnames(error.df.long)[1] <- 'x'
+
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line()
+@
+\end{frame}
+
+\section{Results}
+\begin{frame}
+\begin{itemize}
+\item A SVM model using multiple samplings of each \texttt{wav} file and a high cost has the best prediction
+\item Using a SVM model with LOOCV, we can get a power of approximately $52.3\%$
+\item By adding in volume analysis in a similar style, we should be able to further improve the power of the model
+\end{itemize}
+\end{frame}
+\end{document}
