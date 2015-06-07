@@ -19,6 +19,9 @@
 \usepackage{wrapfig} % Figures to the side of text / text wrapping around figures
 \usepackage{caption} % Captioning of figures
 \usepackage{fancyref} % Referencing of figures and updates automatically as figures change number
+\usepackage{float}
+\usepackage[table]{xcolor}
+\setlength\parindent{0pt}
 % End libraries added by Kyle
 
 \usepackage{fancyhdr}
@@ -107,10 +110,9 @@ Caring for a baby requires patience and effective communication. A caretaker att
  Neutral & 0.2 & 0.6 & 0.2 \\ 
  Laugh & 0.05 & 0.35 & 0.6 \\
  \hline
-\end{tabular}
+\end{tabular}\\\vspace{20pt}
+\begin{huge}$\downarrow$\end{huge}
 \end{center}
-
-\centering $\downarrow$
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| } 
@@ -124,19 +126,19 @@ Caring for a baby requires patience and effective communication. A caretaker att
 \end{tabular}
 \end{center}
 
-\justifying Let $X_t$ be a discrete hidden random variable with $N$ possible values. $P(X_t|X_{t-1})$ is independent of time $t$, so our transition matrix will be:
+Let $X_t$ be a discrete hidden random variable with $N$ possible values. $P(X_t|X_{t-1})$ is independent of time $t$, so our transition matrix will be:
 
 \begin{equation}
 A = \{a_{ij}\} = P(X_t = j|X_{t-1} = i)
 \end{equation}
 
-\noindent \\ The initial state distribution at, for example, $t = 1$, is given by: $\boxed{\pi_i = P(X_1 = i)}$ \\
+The initial state distribution at, for example, $t = 1$, is given by: $\boxed{\pi_i = P(X_1 = i)}$ \\
 
-\noindent The probability of a certain observation occurring at time $t$ for state $j$ is given by: $\boxed{b_j(y_t) = P(Y_t = y_t|X_t = j)}$ \\
+The probability of a certain observation occurring at time $t$ for state $j$ is given by: $\boxed{b_j(y_t) = P(Y_t = y_t|X_t = j)}$ \\
 
-\noindent The observation sequence should look like $Y = (Y_1 = y_1, Y_2 = y_2, \ldots, Y_t = y_t)$
+The observation sequence should look like $Y = (Y_1 = y_1, Y_2 = y_2, \ldots, Y_t = y_t)$
 
-\noindent Altogether, we now have a hidden Markov chain that can be described by:
+Altogether, we now have a hidden Markov chain that can be described by:
 
 \begin{equation}
 \boxed{\theta = (A, B, \pi)}
@@ -155,11 +157,11 @@ Pitch detection and analysis was explored as a method to identify baby cries. Th
 \end{center}
 \end{wrapfigure}
 
-\noindent Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at \url{http://git.aubio.org}}. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
+Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at \url{http://git.aubio.org}}. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
 
-\noindent In order to complete pitch analysis, each 1.5 second \texttt{wav} file was fed through Aubio to get time-series pitch data, then broken into ``events'' based on silence. In figure \ref{fig:aubiograph}, we see an estimate of pitches over time for one such file. This file, for example would be broken into two events. The main event stretches from approximately $t=0.00$ to $t=0.85$. A second event occurs around $t=1.40$.
+In order to complete pitch analysis, each 1.5 second \texttt{wav} file was fed through Aubio to get time-series pitch data, then broken into ``events'' based on silence. In figure \ref{fig:aubiograph}, we see an estimate of pitches over time for one such file. This file, for example would be broken into two events. The main event stretches from approximately $t=0.00$ to $t=0.85$. A second event occurs around $t=1.40$.
 
-\noindent Looking at the graph, it appears that the second event in this file is an error. It is a blip caused by something in the recording that we can safely ignore if we can identify it and separate it from the good data. An easy approximation is to ignore all events shorter than a set time interval. After testing all time intervals using a given model, $t=0.1$ seconds was chosen as the cutoff for ``real'' versus ``fake'' events.
+Looking at the graph, it appears that the second event in this file is an error. It is a blip caused by something in the recording that we can safely ignore if we can identify it and separate it from the good data. An easy approximation is to ignore all events shorter than a set time interval. After testing all time intervals using a given model, $t=0.1$ seconds was chosen as the cutoff for ``real'' versus ``fake'' events.
 
 \begin{wrapfigure}{l}{.3\textwidth}
 \begin{center}
@@ -172,14 +174,44 @@ Pitch detection and analysis was explored as a method to identify baby cries. Th
 
 \noindent After events were detected and pre-processed, summary statistics were collected on each event. Each event was stored with filename, event type (baby\_cry, baby\_laugh, etc.), minimum pitch, 1st quartile, median pitch, 3rd quartile, maximum pitch, mean pitch, and length of the event. Models were then run on these summary statistics to capture and classify them and compare them to the originating source. To start with, the models were built around using the events individually. Eventually, smarter models were built to consider all events from a single file as a unit and decide by voting on the predicted classification of those files.
 
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=.65\textwidth]{aubio_events.pdf}
+\caption{Summary statistics produced from the Aubio output}
+\end{center}
+\end{figure}
+
+\subsection{Measuring Results}
+
 \noindent A baby detector, by nature, is attempting to find when the baby is unhappy by listening for crying. With this in mind, the power of the model (the correct identification of an event when one occurs) is far more important than any other statistics\footnote{This is true within reason; we don't want parents to become complacent because of too many false positives}. For this reason, the models assume that if one event is categorized as a \texttt{baby\_cry} event, then that file is a \texttt{baby\_cry} event. This increases power at the expense of accuracy.
 
 \noindent Additionally, the model was simplified into a binary outcome of a baby crying or not crying. While model was able to classify with some success the other events, the purpose of the monitor is to detect a baby crying, so the model was simplified.
 
 \begin{center}
-\includegraphics[width=.65\textwidth]{aubio_events.pdf}
-%\caption{Summary statistics produced from the Aubio output}
+\begin{tabular}{ r | c | c |}
+Total Population & Baby is Crying & Baby is not Crying \\\hline
+Predicted Crying & \cellcolor{green!25}True Positive (TP) & \cellcolor{red!25}False Positive (FP) \\\hline
+Predicted Not Crying & \cellcolor{red!25}False Negative (FN) & \cellcolor{green!25}True Negative (TN)\\\hline
+\end{tabular}
 \end{center}
+
+\noindent The false positive (FP) is also referred to as Type 1 Error. Similarly, the false negative is referred to as Type 2 Error. The main statistics explored for ranking models were:\\
+\begin{itemize}
+\item Overall prediction rate (or accuracy):
+\begin{align*}
+ACC = \frac{\sum TP + \sum TN}{\sum \text{Total Population}}
+\end{align*}
+\item Power (also known as Sensitivity or True Positive Rate (TPR)):
+\begin{align*}
+TPR = \frac{\sum TP}{\sum TP + \sum FN}
+\end{align*}
+\item Precision (also known as the Positive Predictive Value (PPV)):
+\begin{align*}
+PPV = \frac{\sum TP}{\sum TP + \sum FP}
+\end{align*}
+\end{itemize}
+
+In simple terms, the accuracy is the fraction of total stuff that was correctly classified. Power is the number of times we caught the baby crying over the number of times it did cry. Precision is the fraction of times we thought the baby was crying where the baby was actually crying.
 
 \subsection{K-Means Applied to Pitch Estimates}
 K-means was selected as a candidate classification model because of its relative simplicity. K-means uses euclidean distance between each of the vectors to classify the data into $k$ groups of the shortest distance. The groups are then used to remap the centroids to the mean of each group, and the groups are calculated again. This process continues until an update causes no change in the group assignments, at which point the model has converged.
@@ -190,8 +222,19 @@ K-means was selected as a candidate classification model because of its relative
 \subsubsection{Performance of K-Means}\label{subsubsec:LOOCV}
 The model was checked using Leave One Out Cross Validation (LOOCV). All but one \texttt{wav} files were used in the model. The result was predicted on the left-out \texttt{wav} file. This process was repeated until every file had been left out and the subsequently tested against. Because multiple events may exist per file, several were included in each validation of the model.
 
+While the overall prediction rate of k-means grew over time, the power decayed. The best option for a value of k is therefore $k=2$. However, the performance at $k=1$ suggests that there is not a very clear-cut grouping to choose. Therefore, we should expect that a more complex model may perform better. K-means is a fast algorithm and is easy to understand, but the reliance on euclidean distances hampers the performance.
+
+\begin{figure}[H]
+\begin{center}
+\vspace{-100pt}
+\includegraphics[width=\textwidth]{k_means.pdf}
+\vspace{-120pt}
+\caption{Performance K-means for various values of $k$}
+\end{center}
+\end{figure}
+
 \subsection{Support Vector Machine Applied to Pitch Estimates}
-A Support Vector Machine (SVM) is a machine learning supervised model that attempts to separate classes of data using a training set and a given method. SVM is able to perform non-linear classification by using hyperplanes and so may be more suited to the classification task than K-means.
+A Support Vector Machine (SVM) is a machine learning supervised model that attempts to separate classes of data using a training set and a given method. SVM is able to perform non-linear classification by using multidimensional planes and shapes and so may be more suited to the classification task than K-means.
 
 \noindent SVM relies on a set kernel and cost for solving a model. The kernel dictates what hyperplanes SVM can and will use in it's modeling. In soft SVM, the cost variable dictates the ``cost'' or punishment of the model for violating the classifications during the training phase. Alternatively, hard SVM will fail to missclassify, but may also fail to converge for that reason. This data was not linearly separable, so SVM was unable to sort the sounds exactly, but a reasonable hyperplane was drawn.
 
@@ -200,16 +243,21 @@ A Support Vector Machine (SVM) is a machine learning supervised model that attem
 \subsubsection{Performance of SVM}
 The model was checked using LOOCV in the same style as was done for K-means (see \ref{subsubsec:LOOCV} for details). Multiple tests were performed with various kernels (sigmoid, polynomial and linear), but the radial basis kernel was found to perform the best. Using the radial basis kernel, we varied the misclassification cost and ran the model, producing a plot of Power and Accuracy at various costs.
 
-\begin{figure}
+Power initially starts very low, but rises as cost increases to approximately $cost = 25$. Once we maximize power, the best prediction rate appears at around $cost = 27$.
+
+\begin{figure}[H]
 \begin{center}
-\includegraphics[width=.5\textwidth]{svm_accuracy.pdf}
+\vspace{-100pt}
+\includegraphics[width=\textwidth]{svm_accuracy.pdf}
+\vspace{-120pt}
+\caption{Performance of SVM versus misclassification cost}
 \end{center}
 \end{figure}
 
 \subsection{Comparison of K-Means and SVM}
-In this experiment, we saw slight benefits in using SVM over K-Means. While K-Means has likely reached it's limits with this Data, we would expect SVM to continue to improve given more data.
+In this experiment, we saw slight benefits in using SVM over K-Means. Using 2 clusters, K-Means achieved a prediction rate of approximately $ACC = 0.734$, a power of $TPR = 0.476$, and a precision of $PPV = 0.222$. At $cost = 27$, SVM saw a prediction rate of $ACC = 0.809$, a power of $TPR = 0.524$, and a precision of $PPV = 0.324$. SVM was able to correctly classify more often, and achieve a higher power, catching slightly over half of all the baby cries.
 
-Unfortunately, SVM is generally very computationally expensive compared to K-Means. With the increased complexity, though comes better modelling capabilities.
+While K-Means has likely reached it's limits with this Data, we would expect SVM to continue to improve given more data. Unfortunately, SVM is generally very computationally expensive compared to K-Means. With the increased complexity, though comes better modelling capabilities.
 
 \subsection{Future Improvements}
 Improvements can be made by including other measurement points, for example, relative volume. We would expect, for example that a baby crying and a baby laughing would have distinctly different volumes. Combining both volume and pitch analysis would likely improve the model.
