@@ -155,7 +155,7 @@ Pitch detection and analysis was explored as a method to identify baby cries. Th
 \end{center}
 \end{wrapfigure}
 
-\noindent Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at http://git.aubio.org}. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
+\noindent Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at \url{http://git.aubio.org}}. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
 
 \noindent In order to complete pitch analysis, each 1.5 second \texttt{wav} file was fed through Aubio to get time-series pitch data, then broken into ``events'' based on silence. In figure \ref{fig:aubiograph}, we see an estimate of pitches over time for one such file. This file, for example would be broken into two events. The main event stretches from approximately $t=0.00$ to $t=0.85$. A second event occurs around $t=1.40$.
 
@@ -200,7 +200,23 @@ A Support Vector Machine (SVM) is a machine learning supervised model that attem
 \subsubsection{Performance of SVM}
 The model was checked using LOOCV in the same style as was done for K-means (see \ref{subsubsec:LOOCV} for details). Multiple tests were performed with various kernels (sigmoid, polynomial and linear), but the radial basis kernel was found to perform the best. Using the radial basis kernel, we varied the misclassification cost and ran the model, producing a plot of Power and Accuracy at various costs.
 
-\subsection{Using Baum-Welch Algorithm}
+\begin{figure}
+\begin{center}
+\includegraphics[width=.5\textwidth]{svm_accuracy.pdf}
+\end{center}
+\end{figure}
+
+\subsection{Comparison of K-Means and SVM}
+In this experiment, we saw slight benefits in using SVM over K-Means. While K-Means has likely reached it's limits with this Data, we would expect SVM to continue to improve given more data.
+
+Unfortunately, SVM is generally very computationally expensive compared to K-Means. With the increased complexity, though comes better modelling capabilities.
+
+\subsection{Future Improvements}
+Improvements can be made by including other measurement points, for example, relative volume. We would expect, for example that a baby crying and a baby laughing would have distinctly different volumes. Combining both volume and pitch analysis would likely improve the model.
+
+Additionally, we could expect that given a larger dataset, the classification would improve. This is especially true if SVM is allowed to train on a particular baby's sounds.
+
+\section{Using Baum-Welch Algorithm}
 
 \section{Conclusion}
 
