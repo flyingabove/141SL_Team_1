@@ -14,6 +14,12 @@
 \usepackage{sectsty}
 \allsectionsfont{\centering \normalfont\scshape}
 
+% Libraries added by Kyle
+\usepackage[parfill]{parskip} % Skip in between paragraphs instead of indenting
+\usepackage{wrapfig} % Figures to the side of text / text wrapping around figures
+\usepackage{caption} % Captioning of figures
+\usepackage{fancyref} % Referencing of figures and updates automatically as figures change number
+% End libraries added by Kyle
 
 \usepackage{fancyhdr}
 \pagestyle{fancyplain}
@@ -137,8 +143,41 @@ A = \{a_{ij}\} = P(X_t = j|X_{t-1} = i)
 \end{equation}
 
 \section{Summary of Findings}
-\subsection{Using K-Means}
-\subsection{Using Support Vector Machine (SVM)}
+\section{Classification using Pitch Analysis}
+Pitch detection and analysis was explored as a method to identify baby cries. The detection method relies on the assumption that pitch patterns for each sound type will differ, but within the sound types each sample will be similar.
+
+\begin{wrapfigure}{r}{.4\textwidth}
+\begin{center}
+\vspace{-20pt}
+\includegraphics[width=.38\textwidth]{pitch_time.pdf}
+\caption{Pitch estimate of a \texttt{wav} file}\label{fig:aubiograph}
+\vspace{-20pt}
+\end{center}
+\end{wrapfigure}
+
+\noindent Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at http://git.aubio.org}. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
+
+\noindent In order to complete pitch analysis, each 1.5 second \texttt{wav} file was fed through Aubio to get time-series pitch data, then broken into ``events'' based on silence. In figure \ref{fig:aubiograph}, we see an estimate of pitches over time for one such file. This file, for example would be broken into two events. The main event stretches from approximately $t=0.00$ to $t=0.85$. A second event occurs around $t=1.40$.
+
+\noindent Looking at the graph, it appears that the second event in this file is an error. It is a blip caused by something in the recording that we can safely ignore if we can identify it and separate it from the good data. An easy approximation is to ignore all events shorter than a set time interval. After testing all time intervals using a given model, $t=0.1$ seconds was chosen as the cutoff for ``real'' versus ``fake'' events.
+
+\begin{wrapfigure}{l}{.3\textwidth}
+\begin{center}
+\vspace{-15pt}
+\includegraphics[width=.28\textwidth]{aubio_out.pdf}
+\caption{Data from Aubio with time (l) and pitch estimate (r)}\label{fig:headaubio}
+\end{center}
+\vspace{-20pt}
+\end{wrapfigure}
+
+\noindent After events were detected and pre-processed, summary statistics were collected on each event. Each event was stored with filename, event type (baby\_cry, baby\_laugh, etc.), minimum pitch, 1st quartile, median pitch, 3rd quartile, maximum pitch, mean pitch, and length of the event. Models were then run on these summary statistics to capture and classify them and compare them to the originating source. To start with, the models were built around using the events individually. Eventually, smarter models were built to consider all events from a single file as a unit and decide by voting on the predicted classification of those files.
+
+
+\subsection{K-Means Applied to Pitch Estimates}
+\subsubsection{Performance of K-Means}
+\subsection{Support Vector Machine Applied to Pitch Estimates}
+\subsubsection{Performance of SVM}
+
 \subsection{Using Baum-Welch Algorithm}
 
 \section{Conclusion}
