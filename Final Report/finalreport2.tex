@@ -191,8 +191,6 @@ A Support Vector Machine (SVM) is a machine learning supervised model that attem
 
 \paragraph{} The third approach we tried is to apply Hidden Markov Model to our crying baby data in order to get simulated prediction results. As we decided to use pitch as the predictor and classified it into four categories--high pitch, medium pitch, low pitch, and no pitch, we first need to extract pitches from the WAV file. We designed an algorithm to get the maximum pitch at every point in time, smooth the max points into an envelope pitch curve, and separate the max pitch curve at the troughs. The resulted separation plot is shown. The second step was to get parameters for the Hidden Markov Model. We got the emission matrix directly by summarizing the original data. For the transition matrix, however, we did not have a reliable basis and had to arbitrarily make the transition probability of crying to laughing or to making neutral sounds. Then we applied Viterbi algorithm to find the most likely combinations in the sequence of pitches we extracted.
 
-\justifying \noindent \\ Let $X_t$ be a discrete hidden random variable with $N$ possible values. $P(X_t|X_{t-1})$ is independent of time $t$, so our transition matrix will be:
-
 \section{Summary of Findings}
 
 \subsubsection{Performance of K-Means}\label{subsubsec:LOOCV}
