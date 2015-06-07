@@ -165,18 +165,40 @@ Pitch detection and analysis was explored as a method to identify baby cries. Th
 \begin{center}
 \vspace{-15pt}
 \includegraphics[width=.28\textwidth]{aubio_out.pdf}
-\caption{Data from Aubio with time (l) and pitch estimate (r)}\label{fig:headaubio}
+\caption{Data from Aubio with time (l) and pitch (r)}\label{fig:headaubio}
 \end{center}
 \vspace{-20pt}
 \end{wrapfigure}
 
 \noindent After events were detected and pre-processed, summary statistics were collected on each event. Each event was stored with filename, event type (baby\_cry, baby\_laugh, etc.), minimum pitch, 1st quartile, median pitch, 3rd quartile, maximum pitch, mean pitch, and length of the event. Models were then run on these summary statistics to capture and classify them and compare them to the originating source. To start with, the models were built around using the events individually. Eventually, smarter models were built to consider all events from a single file as a unit and decide by voting on the predicted classification of those files.
 
+\noindent A baby detector, by nature, is attempting to find when the baby is unhappy by listening for crying. With this in mind, the power of the model (the correct identification of an event when one occurs) is far more important than any other statistics\footnote{This is true within reason; we don't want parents to become complacent because of too many false positives}. For this reason, the models assume that if one event is categorized as a \texttt{baby\_cry} event, then that file is a \texttt{baby\_cry} event. This increases power at the expense of accuracy.
+
+\noindent Additionally, the model was simplified into a binary outcome of a baby crying or not crying. While model was able to classify with some success the other events, the purpose of the monitor is to detect a baby crying, so the model was simplified.
+
+\begin{center}
+\includegraphics[width=.65\textwidth]{aubio_events.pdf}
+%\caption{Summary statistics produced from the Aubio output}
+\end{center}
 
 \subsection{K-Means Applied to Pitch Estimates}
-\subsubsection{Performance of K-Means}
+K-means was selected as a candidate classification model because of its relative simplicity. K-means uses euclidean distance between each of the vectors to classify the data into $k$ groups of the shortest distance. The groups are then used to remap the centroids to the mean of each group, and the groups are calculated again. This process continues until an update causes no change in the group assignments, at which point the model has converged.
+
+%ADD K-Means plot
+% Add more text about results and stuff
+
+\subsubsection{Performance of K-Means}\label{subsubsec:LOOCV}
+The model was checked using Leave One Out Cross Validation (LOOCV). All but one \texttt{wav} files were used in the model. The result was predicted on the left-out \texttt{wav} file. This process was repeated until every file had been left out and the subsequently tested against. Because multiple events may exist per file, several were included in each validation of the model.
+
 \subsection{Support Vector Machine Applied to Pitch Estimates}
+A Support Vector Machine (SVM) is a machine learning supervised model that attempts to separate classes of data using a training set and a given method. SVM is able to perform non-linear classification by using hyperplanes and so may be more suited to the classification task than K-means.
+
+\noindent SVM relies on a set kernel and cost for solving a model. The kernel dictates what hyperplanes SVM can and will use in it's modeling. In soft SVM, the cost variable dictates the ``cost'' or punishment of the model for violating the classifications during the training phase. Alternatively, hard SVM will fail to missclassify, but may also fail to converge for that reason. This data was not linearly separable, so SVM was unable to sort the sounds exactly, but a reasonable hyperplane was drawn.
+
+\noindent The SVM model was run in \texttt{R} using the \texttt{e1071} package\footnote{\url{http://cran.r-project.org/web/packages/e1071/e1071.pdf}}.
+
 \subsubsection{Performance of SVM}
+The model was checked using LOOCV in the same style as was done for K-means (see \ref{subsubsec:LOOCV} for details). Multiple tests were performed with various kernels (sigmoid, polynomial and linear), but the radial basis kernel was found to perform the best. Using the radial basis kernel, we varied the misclassification cost and ran the model, producing a plot of Power and Accuracy at various costs.
 
 \subsection{Using Baum-Welch Algorithm}
 
