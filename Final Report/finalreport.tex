@@ -22,6 +22,7 @@
 \usepackage{float}
 \usepackage[table]{xcolor}
 \setlength\parindent{0pt}
+\usepackage[hidelinks]{hyperref}
 % End libraries added by Kyle
 
 \usepackage{fancyhdr}
@@ -74,6 +75,8 @@ The purpose of this study is to discuss algorithms designed to predict whether o
 We were given a multitude of audio files (in WAV format) of animal, baby, and adult sounds. We analyzed the pitch of each sound using two different procedures: (1) using FOSS \textit{aubio} and conducting K-means clustering, which is an iterative classification method that we will discuss in more detail later, and support vector machine (SVM) classification and (2) using a specially designed pitch extraction algorithm to ultimately use the Baum-Welch algorithm to answer a number of questions that we will make clear throughout the report.
 {\textbf{\\ Conclusion.}}
 We arrived at a decent classification algorithm using K-means and SVM, but because of limitations in the data, we did not end up with an extremely successful algorithm based on HMM.  \\
+\textbf{Codebase.}
+\url{https://github.com/flyingabove/141SL_Team_1/}\\
 \horrule{0.5pt} \\[0.4cm]
 % * <bendhong@ucla.edu> 2015-06-06T23:36:04.154Z:
 %
@@ -130,7 +133,7 @@ Pitch detection and analysis was explored as a method to identify baby cries. Th
 \end{center}
 \end{wrapfigure}
 
-Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at \url{http://git.aubio.org}}. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
+Raw audio files (stored as \texttt{wav}) were run through a Free/Libre and Open Source Software package called Aubio\footnote{Package information can be found at \url{aubio.org} or at \url{http://git.aubio.org} }. Aubio is a C-based audio labeling tool that includes several methods and controllable methods for pitch detection in an audio stream.
 
 In order to complete pitch analysis, each 1.5 second \texttt{wav} file was fed through Aubio to get time-series pitch data, then broken into ``events'' based on silence. In figure \ref{fig:aubiograph}, we see an estimate of pitches over time for one such file. This file, for example would be broken into two events. The main event stretches from approximately $t=0.00$ to $t=0.85$. A second event occurs around $t=1.40$.
 
