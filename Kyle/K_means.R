@@ -36,7 +36,7 @@ for( j in 1:n)
 }
 
 error.df <- data.frame(cbind(apply(k.errors,3,function(x) {sum(diag(x)) / sum(x)}),apply(k.errors,3,function(x) { (x[2,2] / sum(x[,2])) }),apply(k.errors,3,function(x) { (x[2,2] / sum(x[2,])) })))
-names(error.df) <- c('pred.rate','type2rate','type1rate')
+names(error.df) <- c('pred.rate','type2rate','Precision')
 
 library(reshape)
 
@@ -44,5 +44,5 @@ error.df.long <- cbind(1:n,melt(error.df))
 
 colnames(error.df.long)[1] <- 'x'
 
-ggplot(error.df.long,aes(x,value,color=variable)) + geom_line()
+ggplot(error.df.long,aes(x,value,color=variable)) + geom_line() + coord_fixed(ratio=20)
 
