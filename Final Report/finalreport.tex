@@ -78,19 +78,8 @@ We arrived at a decent classification algorithm using K-means and SVM, but becau
 \textbf{Codebase.}
 \url{https://github.com/flyingabove/141SL_Team_1/}\\
 \horrule{0.5pt} \\[0.4cm]
-% * <bendhong@ucla.edu> 2015-06-06T23:36:04.154Z:
-%
-% 
-%
-% * <bendhong@ucla.edu> 2015-06-06T23:36:05.493Z:
-%
-% 
-%
+
 \section{Abstract}
-% * <bendhong@ucla.edu> 2015-06-06T23:36:06.752Z:
-%
-% 
-%
 Caring for a baby requires patience and effective communication. A caretaker attends to the baby when he/she cries, but this strictly involves an auditory process. We can see how this becomes problematic for parents who are deaf or have difficulty hearing. Fortunately, because of technological advances, there are now devices that assist parents in determining whether or not their child is crying. Of course, for a device to accurately decipher noises, the algorithm must be able to distinguish between different noises (e.g., between a dog crying and a baby crying). This report discusses the algorithms we designed to predict the baby's emotional state---that is, is the baby crying, laughing, or neutral? 
 
 
@@ -148,7 +137,7 @@ Looking at the graph, it appears that the second event in this file is an error.
 \vspace{-20pt}
 \end{wrapfigure}
 
-After events were detected and pre-processed, summary statistics were collected on each event. Each event was stored with filename, event type (baby\_cry, baby\_laugh, etc.), minimum pitch, 1st quartile, median pitch, 3rd quartile, maximum pitch, mean pitch, and length of the event. Models were then run on these summary statistics to capture and classify them and compare them to the originating source. To start with, the models were built around using the events individually. Eventually, smarter models were built to consider all events from a single file as a unit and decide by voting on the predicted classification of those files.
+After events were detected and pre-processed, summary statistics were collected on each event. Each event was stored with filename, event type (baby\_cry, baby\_laugh, etc.), minimum pitch, 1st quartile, median pitch, 3rd quartile, maximum pitch, mean pitch, and length of the event\footnote{For K-Means, all summary statistics were used. For SVM, we were able to omit Minimum Pitch without impacting the model, however, this may change with a different dataset}. Models were then run on these summary statistics to capture and classify them and compare them to the originating source. To start with, the models were built around using the events individually. Eventually, smarter models were built to consider all events from a single file as a unit and decide by voting on the predicted classification of those files.
 
 \begin{figure}[H]
 \begin{center}
@@ -189,8 +178,10 @@ PPV = \frac{\sum TP}{\sum TP + \sum FP}
 
 In simple terms, the accuracy is the fraction of total stuff that was correctly classified. Power is the number of times we caught the baby crying over the number of times it did cry. Precision is the fraction of times we thought the baby was crying where the baby was actually crying.
 
-\subsection{K-Means Applied to Pitch Estimates}
+\subsection{K-Means Applied to Pitch Estimates}\label{k-means}
 K-means was selected as a candidate classification model because of its relative simplicity. K-means uses euclidean distance between each of the vectors to classify the data into $k$ groups of the shortest distance. The groups are then used to remap the centroids to the mean of each group, and the groups are calculated again. This process continues until an update causes no change in the group assignments, at which point the model has converged.
+
+In order to increase the definition of the data, \texttt{aubiopitch} was run with default detection method (yinfft) and hopsize\footnote{The number of samples between two analyses} (256) as well as once using a hopsize of 128 and once using a hopsize of 512. By using multiple hopsizes, we hope to get both more instantaneous and more averaged pitch estimates. Other pitch detection methods were used, but none were as effective.
 
 \subsubsection{Performance of K-Means}\label{subsubsec:LOOCV}
 The model was checked using Leave One Out Cross Validation (LOOCV). All but one \texttt{wav} files were used in the model. The result was predicted on the left-out \texttt{wav} file. This process was repeated until every file had been left out and the subsequently tested against. Because multiple events may exist per file, several were included in each validation of the model.
@@ -211,7 +202,7 @@ A Support Vector Machine (SVM) is a machine learning supervised model that attem
 
 \noindent SVM relies on a set kernel and cost for solving a model. The kernel dictates what hyperplanes SVM can and will use in it's modeling. In soft SVM, the cost variable dictates the ``cost'' or punishment of the model for violating the classifications during the training phase. Alternatively, hard SVM will fail to missclassify, but may also fail to converge for that reason. This data was not linearly separable, so SVM was unable to sort the sounds exactly, but a reasonable hyperplane was drawn.
 
-\noindent The SVM model was run in \texttt{R} using the \texttt{e1071} package\footnote{\url{http://cran.r-project.org/web/packages/e1071/e1071.pdf}}.
+For SVM, the data was set up in the same way as K-Means (Section \ref{k-means}), with multiple passes using \texttt{aubiopitch} at various hopsizes. The SVM model was run in \texttt{R} using the \texttt{e1071} package\footnote{\url{http://cran.r-project.org/web/packages/e1071/e1071.pdf}}. While initially, the \texttt{gamma} value (kernel parameter) was changed in an attempt to optimize the solution, later efforts allowed the parameter to take the default value.
 
 \subsubsection{Performance of SVM}
 The model was checked using LOOCV in the same style as was done for K-means (see \ref{subsubsec:LOOCV} for details). Multiple tests were performed with various kernels (sigmoid, polynomial and linear), but the radial basis kernel was found to perform the best. Using the radial basis kernel, we varied the misclassification cost and ran the model, producing a plot of Power and Accuracy at various costs.
@@ -232,10 +223,10 @@ In this experiment, we saw slight benefits in using SVM over K-Means. Using 2 cl
 
 While K-Means has likely reached its limits with this Data, we would expect SVM to continue to improve given more data. Unfortunately, SVM is generally very computationally expensive compared to K-Means. With the increased complexity, though comes better modeling capabilities.
 
-\subsection{Future Improvements}
+\subsection{Recommendations}
 Improvements can be made by including other measurement points, for example, relative volume. We would expect, for example that a baby crying and a baby laughing would have distinctly different volumes. Combining both volume and pitch analysis would likely improve the model.
 
-Additionally, we could expect that given a larger dataset, the classification would improve. This is especially true if SVM is allowed to train on a particular baby's sounds.
+Additionally, we could expect that given a larger dataset, the classification would improve. This is especially true if SVM is allowed to train on a particular baby's sounds and then predict on that same baby's sound.
 
 \section{Hidden Markov Model} 
 
@@ -267,25 +258,33 @@ Additionally, we could expect that given a larger dataset, the classification wo
 \end{tabular}
 \end{center}
 
-%\begin{wrapfigure}{l}{.25\textwidth}
-%\begin{center}
-%\vspace{-15pt}
-%\includegraphics[width=.25\textwidth]{plot.png}
-%\end{center}
-%\vspace{-20pt}
-%\end{wrapfigure}
+\begin{wrapfigure}{r}{.5\textwidth}
+\begin{center}
+\vspace{-20pt}
+\includegraphics[width=.5\textwidth]{plot.png}
+\caption{Pitch separation plot}\label{fig:feature}
+\vspace{-15pt}
+\end{center}
+\end{wrapfigure}
 
-The third approach we tried is to apply Hidden Markov Model to our crying baby data in order to get simulated prediction results. As we decided to use pitch as the predictor and classified it into four categories--high pitch, medium pitch, low pitch, and no pitch, we first need to extract pitches from the WAV file. We designed an algorithm to get the maximum pitch at every point in time, smooth the max points into an envelope pitch curve, and separate the max pitch curve at the troughs. The resulted separation plot is shown. The second step was to get parameters for the Hidden Markov Model. We got the emission matrix directly by summarizing the original data. For the transition matrix, however, we did not have a reliable basis and had to arbitrarily make the transition probability of crying to laughing or to making neutral sounds. Then we applied Viterbi algorithm to find the most likely combinations in the sequence of pitches we extracted.
+\vspace{10pt}
+The third approach we tried is to apply Hidden Markov Model to our crying baby data in order to get simulated prediction results. As we decided to use pitch as the predictor and classified it into four categories--high pitch, medium pitch, low pitch, and no pitch, we first need to extract pitches from the WAV file. We designed an algorithm to get the maximum pitch at every point in time, smooth the max points into an envelope pitch curve, and separate the max pitch curve at the troughs. The resulted separation plot is shown in figure \ref{fig:feature}.
+
+The second step was to get parameters for the Hidden Markov Model. We got the emission matrix directly by summarizing the original data. For the transition matrix, however, we did not have a reliable basis and had to arbitrarily make the transition probability of crying to laughing or to making neutral sounds. Then we applied Viterbi algorithm to find the most likely combinations in the sequence of pitches we extracted.
 
 \subsection{Using Baum-Welch Algorithm}
 
-Our simulated results shows an around 40\% percent success rate of determining whether the baby is crying or laughing. Honestly, this success rate is not compelling due to the many constraints in our data and model which are discussed in \ref{subsec:hmmshort}.
+Our simulated results shows an around 40\% percent success rate of determining whether the baby is crying or laughing. This success rate is not compelling, but it's low performance is due to the many constraints in our data and model which are discussed in \ref{subsec:hmmshort}.
 
 %\section{Conclusion}
 %Ultimately, we ended up with three models, two of which performed fairly well (K-means and SVM), and one that given a more comprehensive dataset may yield better results.
 
 \subsection{Shortcomings}\label{subsec:hmmshort}
-We encountered many problems when applying the Hidden Markov Model in the prediction. The small sample size led us to one of our first problems. Since we only have 62 WAV files related to baby sounds, we could not get a reliable estimation for the initial emission matrix used in the hidden Markov model. Given the fact that the accuracy of hidden Markov model heavily relies on the emission matrix and transition matrix, the lack of a reliable emission matrix compromises our success rate. That the length of each audio recorded is really short was also problematic for us. Most of the recorded sounds are less than 2 seconds. It is relatively hard to determine whether a baby is crying or laughing with just one sound lasting for only one second. If we could get a substantially large sample with each recording lasting for more than one hour, we are confident that our simulated results would be much more reliable. Another shortcoming of our model is that we could not get a convincing transition matrix. The transition matrix lists the probability that a cry sound would stay crying, or change to either laugh or neutral in the next state. We arbitrarily determined the transition probabilities in our model, and this matrix might be significantly different from the real transition probabilities.
+We encountered many problems when applying the Hidden Markov Model in the prediction. The small sample size led us to one of our first problems. Since we only have 62 WAV files related to baby sounds, we could not get a reliable estimation for the initial emission matrix used in the hidden Markov model. Given the fact that the accuracy of hidden Markov model heavily relies on the emission matrix and transition matrix, the lack of a reliable emission matrix compromises our success rate.
+
+The relatively short length of each audio recording was also problematic for us. Most of the recorded sounds are less than 2 seconds. It is relatively hard to determine whether a baby is crying or laughing with just one sound lasting for only one second. If we could get a substantially large sample with each recording lasting for more than one hour, we are confident that our simulated results would be much more reliable.
+
+Another shortcoming of our model is that we could not get a convincing transition matrix. The transition matrix lists the probability that a cry sound would stay crying, or change to either laugh or neutral in the next state. We arbitrarily determined the transition probabilities in our model, and this matrix might be significantly different from the real transition probabilities.
 
 \subsection{Recommendations}
 Though the algorithm based on the hidden Markov model only performed slightly better than a random number generator, we believe that with a more comprehensive data set, we would be able to yield more appealing results. Ideally, the data set would consist of hours and hours of long recordings of baby noise and have over 10,000 observations of individual baby noises. With such a data set in hand, we would be able to answer the following questions (and therefore conduct a more thorough analysis using HMM):
