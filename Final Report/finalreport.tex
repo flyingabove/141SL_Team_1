@@ -276,15 +276,15 @@ The third approach we tried is to apply Hidden Markov Model to our crying baby d
 
 \subsection{Using Baum-Welch Algorithm}
 
-Our simulated results shows an around 40\% percent success rate of determining whether the baby is crying or laughing. Honestly, this success rate is not compelling due to the many constraints in our data and model which we would further discuss shortly.
+Our simulated results shows an around 40\% percent success rate of determining whether the baby is crying or laughing. Honestly, this success rate is not compelling due to the many constraints in our data and model which are discussed in \ref{subsec:hmmshort}.
 
-\section{Conclusion}
-Ultimately, we ended up with three models, two of which performed fairly well (K-means and SVM), and one that given a more comprehensive dataset may yield better results.
+%\section{Conclusion}
+%Ultimately, we ended up with three models, two of which performed fairly well (K-means and SVM), and one that given a more comprehensive dataset may yield better results.
 
-\section{Shortcomings}
+\subsection{Shortcomings}\label{subsec:hmmshort}
 We encountered many problems when applying the Hidden Markov Model in the prediction. The small sample size led us to one of our first problems. Since we only have 62 WAV files related to baby sounds, we could not get a reliable estimation for the initial emission matrix used in the hidden Markov model. Given the fact that the accuracy of hidden Markov model heavily relies on the emission matrix and transition matrix, the lack of a reliable emission matrix compromises our success rate. That the length of each audio recorded is really short was also problematic for us. Most of the recorded sounds are less than 2 seconds. It is relatively hard to determine whether a baby is crying or laughing with just one sound lasting for only one second. If we could get a substantially large sample with each recording lasting for more than one hour, we are confident that our simulated results would be much more reliable. Another shortcoming of our model is that we could not get a convincing transition matrix. The transition matrix lists the probability that a cry sound would stay crying, or change to either laugh or neutral in the next state. We arbitrarily determined the transition probabilities in our model, and this matrix might be significantly different from the real transition probabilities.
 
-\section{Recommendations}
+\subsection{Recommendations}
 Though the algorithm based on the hidden Markov model only performed slightly better than a random number generator, we believe that with a more comprehensive data set, we would be able to yield more appealing results. Ideally, the data set would consist of hours and hours of long recordings of baby noise and have over 10,000 observations of individual baby noises. With such a data set in hand, we would be able to answer the following questions (and therefore conduct a more thorough analysis using HMM):
 
 \begin{itemize}
