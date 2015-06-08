@@ -97,10 +97,27 @@ Caring for a baby requires patience and effective communication. A caretaker att
 	\item Given that our algorithm works, what is its prediction rate---that is, how often does our algorithm successfully classify noises into their respective categories?
 \end{enumerate}
 
-\section{Variable Description}
+%\section{Variable Description}
+%
+%Essentially, we were only considered with one variable, \textbf{PITCH}, which we divided into four levels: high pitch, medium pitch, low pitch, and no pitch.
 
-Essentially, we were only considered with one variable, \textbf{PITCH}, which we divided into four levels: high pitch, medium pitch, low pitch, and no pitch.
-
+\section{Description of Data}
+For this project, we were given 183 \texttt{wav} files split between several sounds:
+\begin{center}
+\begin{tabular}{r l}
+19 & Adult Female Cry\\
+15 & Adult Female Laugh \\
+15 & Adult Male Laugh \\
+15 & Adult Female Neutral \\
+15 & Adult Male Neutral \\
+15 & Animal Cat\\
+15 & Animal Dog\\
+21 & Baby Cry \\
+18 & Baby Laugh \\
+25 & Baby Neutral
+\end{tabular}
+\end{center}
+Each file is approximately 1.5 seconds in length and contains lossless sound without background noise. Each file is labeled according to the contents. 
 \section{Classification using Pitch Analysis}
 Pitch detection and analysis was explored as a method to identify baby cries. The detection method relies on the assumption that pitch patterns for each sound type will differ, but within the sound types each sample will be similar.
 
@@ -172,9 +189,6 @@ In simple terms, the accuracy is the fraction of total stuff that was correctly 
 \subsection{K-Means Applied to Pitch Estimates}
 K-means was selected as a candidate classification model because of its relative simplicity. K-means uses euclidean distance between each of the vectors to classify the data into $k$ groups of the shortest distance. The groups are then used to remap the centroids to the mean of each group, and the groups are calculated again. This process continues until an update causes no change in the group assignments, at which point the model has converged.
 
-%ADD K-Means plot
-% Add more text about results and stuff
-
 \subsubsection{Performance of K-Means}\label{subsubsec:LOOCV}
 The model was checked using Leave One Out Cross Validation (LOOCV). All but one \texttt{wav} files were used in the model. The result was predicted on the left-out \texttt{wav} file. This process was repeated until every file had been left out and the subsequently tested against. Because multiple events may exist per file, several were included in each validation of the model.
 
@@ -222,8 +236,9 @@ Additionally, we could expect that given a larger dataset, the classification wo
 
 \section{Hidden Markov Model} 
 
-\centering \textbf{Old Transition Matrix}
 \begin{center}
+\textbf{Old Transition Matrix}
+
 \begin{tabular}{ |c|c|c|c| } 
  \hline
        & Cry & Neutral & Laugh \\
@@ -233,12 +248,11 @@ Additionally, we could expect that given a larger dataset, the classification wo
  Laugh & 0.05 & 0.35 & 0.6 \\
  \hline
 \end{tabular}
-\end{center}
 
-\centering $\downarrow$
+\begin{huge}$\downarrow$\end{huge}
 
-\centering \textbf{New Transition Matrix}
-\begin{center}
+\textbf{New Transition Matrix}
+
 \begin{tabular}{ |c|c|c|c| } 
  \hline
        & Cry & Neutral & Laugh \\
@@ -250,17 +264,17 @@ Additionally, we could expect that given a larger dataset, the classification wo
 \end{tabular}
 \end{center}
 
-\begin{wrapfigure}{l}{.25\textwidth}
-\begin{center}
-\vspace{-15pt}
-\includegraphics[width=.25\textwidth]{plot.png}
-\end{center}
-\vspace{-20pt}
-\end{wrapfigure}
+%\begin{wrapfigure}{l}{.25\textwidth}
+%\begin{center}
+%\vspace{-15pt}
+%\includegraphics[width=.25\textwidth]{plot.png}
+%\end{center}
+%\vspace{-20pt}
+%\end{wrapfigure}
 
-\paragraph{} The third approach we tried is to apply Hidden Markov Model to our crying baby data in order to get simulated prediction results. As we decided to use pitch as the predictor and classified it into four categories--high pitch, medium pitch, low pitch, and no pitch, we first need to extract pitches from the WAV file. We designed an algorithm to get the maximum pitch at every point in time, smooth the max points into an envelope pitch curve, and separate the max pitch curve at the troughs. The resulted separation plot is shown. The second step was to get parameters for the Hidden Markov Model. We got the emission matrix directly by summarizing the original data. For the transition matrix, however, we did not have a reliable basis and had to arbitrarily make the transition probability of crying to laughing or to making neutral sounds. Then we applied Viterbi algorithm to find the most likely combinations in the sequence of pitches we extracted.
+The third approach we tried is to apply Hidden Markov Model to our crying baby data in order to get simulated prediction results. As we decided to use pitch as the predictor and classified it into four categories--high pitch, medium pitch, low pitch, and no pitch, we first need to extract pitches from the WAV file. We designed an algorithm to get the maximum pitch at every point in time, smooth the max points into an envelope pitch curve, and separate the max pitch curve at the troughs. The resulted separation plot is shown. The second step was to get parameters for the Hidden Markov Model. We got the emission matrix directly by summarizing the original data. For the transition matrix, however, we did not have a reliable basis and had to arbitrarily make the transition probability of crying to laughing or to making neutral sounds. Then we applied Viterbi algorithm to find the most likely combinations in the sequence of pitches we extracted.
 
-\subsubsection{Using Baum-Welch Algorithm}
+\subsection{Using Baum-Welch Algorithm}
 
 Our simulated results shows an around 40\% percent success rate of determining whether the baby is crying or laughing. Honestly, this success rate is not compelling due to the many constraints in our data and model which we would further discuss shortly.
 
