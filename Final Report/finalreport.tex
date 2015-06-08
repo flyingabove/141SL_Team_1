@@ -227,7 +227,7 @@ Power initially starts very low, but rises as cost increases to approximately $c
 \subsection{Comparison of K-Means and SVM}
 In this experiment, we saw slight benefits in using SVM over K-Means. Using 2 clusters, K-Means achieved a prediction rate of approximately $ACC = 0.734$, a power of $TPR = 0.476$, and a precision of $PPV = 0.222$. At $cost = 27$, SVM saw a prediction rate of $ACC = 0.809$, a power of $TPR = 0.524$, and a precision of $PPV = 0.324$. SVM was able to correctly classify more often, and achieve a higher power, catching slightly over half of all the baby cries.
 
-While K-Means has likely reached it's limits with this Data, we would expect SVM to continue to improve given more data. Unfortunately, SVM is generally very computationally expensive compared to K-Means. With the increased complexity, though comes better modelling capabilities.
+While K-Means has likely reached its limits with this Data, we would expect SVM to continue to improve given more data. Unfortunately, SVM is generally very computationally expensive compared to K-Means. With the increased complexity, though comes better modeling capabilities.
 
 \subsection{Future Improvements}
 Improvements can be made by including other measurement points, for example, relative volume. We would expect, for example that a baby crying and a baby laughing would have distinctly different volumes. Combining both volume and pitch analysis would likely improve the model.
@@ -279,7 +279,7 @@ The third approach we tried is to apply Hidden Markov Model to our crying baby d
 Our simulated results shows an around 40\% percent success rate of determining whether the baby is crying or laughing. Honestly, this success rate is not compelling due to the many constraints in our data and model which we would further discuss shortly.
 
 \section{Conclusion}
-Ultimately, we ended up with three models, two of which performed fairly well (K-means and SVM), and one that, with a more comprehensive dataset may yield much better results. 
+Ultimately, we ended up with three models, two of which performed fairly well (K-means and SVM), and one that given a more comprehensive dataset may yield better results.
 
 \section{Shortcomings}
 We encountered many problems when applying the Hidden Markov Model in the prediction. The small sample size led us to one of our first problems. Since we only have 62 WAV files related to baby sounds, we could not get a reliable estimation for the initial emission matrix used in the hidden Markov model. Given the fact that the accuracy of hidden Markov model heavily relies on the emission matrix and transition matrix, the lack of a reliable emission matrix compromises our success rate. That the length of each audio recorded is really short was also problematic for us. Most of the recorded sounds are less than 2 seconds. It is relatively hard to determine whether a baby is crying or laughing with just one sound lasting for only one second. If we could get a substantially large sample with each recording lasting for more than one hour, we are confident that our simulated results would be much more reliable. Another shortcoming of our model is that we could not get a convincing transition matrix. The transition matrix lists the probability that a cry sound would stay crying, or change to either laugh or neutral in the next state. We arbitrarily determined the transition probabilities in our model, and this matrix might be significantly different from the real transition probabilities.
